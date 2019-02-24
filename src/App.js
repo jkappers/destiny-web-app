@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import { MuiThemeProvider, withStyles, createMuiTheme } from '@material-ui/core/styles';
 import uuid from 'uuid/v4';
 import Avatar from '@material-ui/core/Avatar';
@@ -30,7 +31,10 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import InputAdornment from '@material-ui/core/InputAdornment';
-
+import LoginView from './modules/login';
+import BooksView from './modules/books';
+import SecureRoute from './components/SecureRoute';
+import store from './services/store';
 const theme = createMuiTheme({
   palette: {
     primary: {
@@ -72,7 +76,9 @@ if (initialBook) {
   initialContent = initialPage.content;
 }
 
+
 class App extends Component {
+
   state = {
     book: initialBook,
     content: initialContent,
@@ -320,288 +326,21 @@ class App extends Component {
     const { menu, book, page } = this.state;
 
     return (
-      <MuiThemeProvider theme={theme}>
-        <AppBar position="sticky">
-          <Toolbar>
-            <Typography variant="h6" color="inherit" className={classes.grow}>
-              Destiny Builder
-            </Typography>
-            <div>
-              <IconButton color="inherit" onClick={this.onMenuOpened}>
-                <Icon>more_vert</Icon>
-              </IconButton>
-                <Menu
-                  open={Boolean(menu)}
-                  onClose={this.onMenuClosed}
-                  anchorEl={menu}
-                >
-                  <MenuItem onClick={() => {
-                    this.onMenuClosed();
-                    this.onFileDialogOpened();
-                  }}>
-                    <ListItemIcon>
-                      <Icon>folder_open</Icon>
-                    </ListItemIcon>
-                    <ListItemText inset primary="Open" />
-                  </MenuItem>
-                  <MenuItem onClick={() => {
-                    this.onMenuClosed();
-                    this.onExport();
-                  }}>
-                    <ListItemIcon>
-                      <Icon>save_alt</Icon>
-                    </ListItemIcon>
-                    <ListItemText inset primary="Export" />
-                  </MenuItem>
-                </Menu>
-              </div>
-          </Toolbar>
-        </AppBar>
-
-        {book && (
-          <Fragment>
-          <AppBar position="sticky" color="default">
-            <Toolbar>
-              <Button
-                variant="outlined"
-                color="primary"
-                onClick={this.onSave}>
-                Save
-              </Button>
-            </Toolbar>
-          </AppBar>
-          <Grid container>
-            <Grid item xs={4}>
-              <List>
-                <ListSubheader>Pages</ListSubheader>
-                {book.pages.map(page => (
-                  <ListItem key={page.id} button divider onClick={e => this.onPageClicked(page)}>
-                    <ListItemText
-                      primary={page.content}
-                      primaryTypographyProps={{ noWrap: true }}
-                    />
-                    <ListItemIcon>
-                      <Icon>chevron_right</Icon>
-                    </ListItemIcon>
-                  </ListItem>
-                ))}
-              </List>
-              <Toolbar>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={this.onNewPageClicked}
-                  fullWidth>
-                  New Page
-                </Button>
-              </Toolbar>
-            </Grid>
-            <Grid item xs={8}>
-              <Grid container justify="center">
-                <Grid item xs={11}>
-                  <Toolbar style={{ justifyContent: "flex-end" }} disableGutters>
-                    <Button
-                      color="secondary"
-                      onClick={this.onDeletePageDialogOpened}>
-                      Delete
-                    </Button>
-                  </Toolbar>
-                  {this.state.page && (
-                    <Fragment>
-                      <TextField
-                        label="Content"
-                        margin="normal"
-                        value={this.state.content}
-                        variant="outlined"
-                        onChange={this.onContentChanged}
-                        fullWidth
-                        multiline
-                      />
-                      <List>
-                        <ListSubheader>Origins</ListSubheader>
-                        {this.pageOrigins(page).map(x => (
-                          <ListItem key={x.choice.id}>
-                            <ListItemAvatar>
-                              <Avatar>
-                                <Icon>trip_origin</Icon>
-                              </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                              primary={x.choice.description}
-                              primaryTypographyProps={{ noWrap: true }}
-                              secondary={x.page.content}
-                              secondaryTypographyProps={{ noWrap: true }}
-                            />
-                          </ListItem>                          
-                        ))}
-                      </List>
-                      <List>
-                        <ListSubheader>Destinations</ListSubheader>
-                        {this.pageDestinations(page).map(dest => (
-                          <ListItem key={dest.choice.id}>
-                            <ListItemAvatar>
-                              <Avatar>
-                                <Icon>link</Icon>
-                              </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText
-                              primary={dest.choice.description}
-                              primaryTypographyProps={{ noWrap: true }}
-                              secondary={dest.page.content}
-                              secondaryTypographyProps={{ noWrap: true }}
-                            />
-                            <ListItemSecondaryAction>
-                              <IconButton aria-label="Comments" onClick={() => {
-                                this.onDestinationDialogOpened({
-                                  id: dest.choice.id,
-                                  description: dest.choice.description,
-                                  page_id: dest.choice.page_id,
-                                  query: ''
-                                })
-                              }}>
-                                <Icon>edit</Icon>
-                              </IconButton>
-                            </ListItemSecondaryAction>
-                          </ListItem>
-                        ))}
-                        <ListItem button onClick={() => {
-                          this.onDestinationDialogOpened({
-                            id: '',
-                            description: '',
-                            page_id: null,
-                            query: ''
-                          })
-                        }}>
-                          <ListItemAvatar>
-                            <Avatar>
-                              <Icon>add</Icon>
-                            </Avatar>
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary="Add another..."
-                            primaryTypographyProps={{ noWrap: true }}
-                            />
-                        </ListItem>
-                      </List>
-                    </Fragment>
-                  )}
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Fragment>
-        )}
-
-        <Dialog
-          open={this.state.isFileDialogOpen}
-          onClose={this.onFileDialogClosed}>
-          <DialogTitle>Open</DialogTitle>
-          <DialogContent>
-            <form id="open-file-form" onSubmit={this.onFileSubmitted}>
-              <TextField
-                id="name"
-                label="file"
-                type="file"
-                inputProps={{ accept: ".json,application/json" }}
-                inputRef={ref => this._fileInputRef = ref}
-                required
-                fullWidth
-                autoFocus
-              />
-            </form>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.onFileDialogClosed}>
-              Cancel
-            </Button>
-            <Button form="open-file-form" type="submit">
-              Open
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        <Dialog
-          fullWidth
-          open={this.state.isDestDialogOpen}
-          onClose={this.onDestDialogClosed}>
-          <DialogTitle>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: "center"
-            }}>            
-              <span>Destination</span>
-              {this.state.editingDestination.id && (
-                <IconButton color="secondary" onClick={this.onDeleteChoice}>
-                  <Icon>delete</Icon>
-                </IconButton>
-              )}
-            </div>
-          </DialogTitle>
-          <DialogContent>
-            <Grid container>
-              <Grid item xs={12}>
-                <form id="destination-form" onSubmit={this.onDestinationSubmitted}>
-                  <TextField
-                    id="name"
-                    label="Description"
-                    type="text"
-                    value={this.state.editingDestination.description}
-                    onChange={this.onDestinationDescChanged}
-                    autoComplete="off"
-                    required
-                    fullWidth
-                    autoFocus
-                  />
-                  <br/>
-                  <div style={{ marginTop: 16 }}> 
-                  <FormControl component="fieldset" style={{width: '100%'}}>
-                    <FormLabel component="legend">Page</FormLabel>
-                    <div style={{ marginTop: 16 }}> 
-                      <TextField
-                        id="name"
-                        label="Search..."
-                        type="search"
-                        variant="outlined"
-                        onChange={this.onDestinationPageQueryChanged}
-                        autoComplete="off"
-                        fullWidth
-                      />   
-                    </div>
-                    <RadioGroup
-                      aria-label="Page"
-                      name="page"
-                      value={this.state.editingDestination.page_id}
-                      onChange={this.onDestinationPageChanged}
-                      required
-                    >
-                      {this.destinationFilteredPages().map(page => (
-                        <NoWrapFormControlLabel
-                          key={page.id}
-                          value={page.id}
-                          control={<Radio />}
-                          label={page.content}
-                        />  
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                  </div>
-                </form>
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.onDestDialogClosed}>
-              Cancel
-            </Button>
-            <Button form="destination-form" type="submit">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>        
-      </MuiThemeProvider>
+        <Router>
+          <MuiThemeProvider theme={theme}>
+            <Switch>
+              <SecureRoute exact path="/" component={BooksView} />
+              <Route path="/login" component={LoginView} />
+              <Route component={NoMatch} />
+            </Switch>
+          </MuiThemeProvider>
+        </Router>
     );
   }
 }
+
+const Another = () => <div>Another</div>
+const About = () => <div>About</div>
+const NoMatch = () => <div>None</div>
 
 export default withStyles(styles)(App);

@@ -5,6 +5,7 @@
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="theme-color" content="#000000">
+    
     <!--
       manifest.json provides metadata used when your web app is added to the
       homescreen on Android. See https://developers.google.com/web/fundamentals/engage-and-retain/web-app-manifest/
@@ -23,6 +24,19 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>html,body,#root{ height: 100% }</style>
     <title>Destiny Builder</title>
+    <script src="https://www.gstatic.com/firebasejs/5.8.4/firebase.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyBILMac_P-i_QrF-QSowvAlJjPC8KOsJqk",
+        authDomain: "destiny-app-cadf9.firebaseapp.com",
+        databaseURL: "https://destiny-app-cadf9.firebaseio.com",
+        projectId: "destiny-app-cadf9",
+        storageBucket: "destiny-app-cadf9.appspot.com",
+        messagingSenderId: "809284190476"
+      };
+      firebase.initializeApp(config);
+    </script>    
   </head>
   <body>
     <noscript>
