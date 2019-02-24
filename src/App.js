@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import { MuiThemeProvider, withStyles, createMuiTheme } from '@material-ui/core/styles';
 import uuid from 'uuid/v4';
 import Avatar from '@material-ui/core/Avatar';
 import AppBar from '@material-ui/core/AppBar';
@@ -30,6 +30,23 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import InputAdornment from '@material-ui/core/InputAdornment';
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      light: '#f05545',
+      main: '#b71c1c',
+      dark: '#7f0000',
+      contrastText: '#fff',
+    },
+    secondary: {
+      light: '#63a4ff',
+      main: '#1976d2',
+      dark: '#004ba0',
+      contrastText: '#fff',
+    },
+  },
+});
 
 const NoWrapFormControlLabel = withStyles({
   label: {
@@ -82,7 +99,7 @@ class App extends Component {
     const origins = [];
 
     book.pages.forEach(x => {
-      x.choices
+      (x.choices || [])
        .filter(({ page_id }) => page_id === page.id)
        .forEach(y => {
          origins.push({
@@ -98,7 +115,7 @@ class App extends Component {
   pageDestinations = page => {
     const { book } = this.state;
 
-    return page.choices.map(choice => ({
+    return (page.choices || []).map(choice => ({
       choice,
       page: book.pages.find(x => x.id === choice.page_id)
     }));
@@ -303,7 +320,7 @@ class App extends Component {
     const { menu, book, page } = this.state;
 
     return (
-      <Fragment>
+      <MuiThemeProvider theme={theme}>
         <AppBar position="sticky">
           <Toolbar>
             <Typography variant="h6" color="inherit" className={classes.grow}>
@@ -381,7 +398,7 @@ class App extends Component {
             </Grid>
             <Grid item xs={8}>
               <Grid container justify="center">
-                <Grid xs={11}>
+                <Grid item xs={11}>
                   <Toolbar style={{ justifyContent: "flex-end" }} disableGutters>
                     <Button
                       color="secondary"
@@ -523,7 +540,7 @@ class App extends Component {
           </DialogTitle>
           <DialogContent>
             <Grid container>
-              <Grid xs={12}>
+              <Grid item xs={12}>
                 <form id="destination-form" onSubmit={this.onDestinationSubmitted}>
                   <TextField
                     id="name"
@@ -582,7 +599,7 @@ class App extends Component {
             </Button>
           </DialogActions>
         </Dialog>        
-      </Fragment>
+      </MuiThemeProvider>
     );
   }
 }
