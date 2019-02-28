@@ -21,7 +21,6 @@ const SecureRoute = ({ isAuthenticated, component: Component, ...rest }) => (
 );
 
 const mapStateToProps = state => {
-  console.log('HENLO', state);
   return {
     isAuthenticated: state.email
   }

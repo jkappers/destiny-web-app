@@ -15,7 +15,7 @@ firebase.auth().onAuthStateChanged(user => {
   }
 });
 
-// FIXME: This isn't ideal at all :(
+// FIXME: This timeout isn't ideal at all :(
 setTimeout(() => {
   ReactDOM.render(
     <Provider store={store}>
