@@ -45,6 +45,9 @@ const getPageByBookId = bookId =>
     .get()
     .then(query => query.docs.map(adapter));
 
+const savePage = (pageId, data) =>
+  db.collection('pages').doc(pageId).update(data);
+     
 export {
   getBook,
   getBooks,
@@ -53,5 +56,6 @@ export {
   getConnectionsFromPageId,
   addPage,
   getPage,
-  getPageByBookId
+  getPageByBookId,
+  savePage
 }

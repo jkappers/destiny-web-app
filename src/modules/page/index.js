@@ -1,12 +1,16 @@
+import debounce from 'debounce';
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
+import { withStyles } from '@material-ui/core/styles'
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
-import { getPage } from '../../services/data';
+import Typography from '@material-ui/core/Typography';
+import IconedButton from '../../components/IconedButton';
+import Main from '../../components/Main';
+import { getPage, savePage } from '../../services/data';
 
 class PageView extends React.Component {
   state = {
@@ -23,6 +27,14 @@ class PageView extends React.Component {
   handleInputChanged = ({ currentTarget: { name, value } }) =>
     this.setState({ [name]: value });
 
+  handleSubmit = e => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    savePage(this.props.match.params.pageId, {
+      content: data.get('content')
+    });
+  };
+
   render() {
     const { page } = this.state;
 
@@ -34,31 +46,60 @@ class PageView extends React.Component {
       <Fragment>
         <AppBar color="default" position="sticky">
           <Toolbar>
-            <IconButton color="primary" component={Link} to={`/books/${page.bookId}/pages`}>
-              <Icon>collections_bookmark</Icon>
-            </IconButton>
-            <IconButton color="primary" component={Link} to={`/pages/${page.id}/choices`}>
-              <Icon>shuffle</Icon>
-            </IconButton>
+            <IconedButton
+              color="primary"
+              component={Link}
+              to={`/books/${page.bookId}/pages`}
+              icon={<Icon>list</Icon>}>
+              Pages
+            </IconedButton>
+            <div className={this.props.classes.grow} />
+            <IconedButton
+              color="primary"
+              component={Link}
+              to={`/pages/${page.id}/choices`}
+              icon={<Icon>shuffle</Icon>}>
+              Choices
+            </IconedButton>
           </Toolbar>          
         </AppBar>
-        <Grid container justify="center">
-          <Grid item xs={11}>
-            <TextField
-              label="Content"
-              margin="normal"
-              defaultValue={page.content}
-              variant="outlined"
-              onChange={this.handleInputChanged}
-              fullWidth
-              multiline
-              rows={10}
-            />
+        <Main>
+          <Grid container justify="center">
+            <Grid item xs={11}>
+              <form onSubmit={this.handleSubmit}>
+                <TextField
+                  name="content"
+                  label="Content"
+                  margin="normal"
+                  defaultValue={page.content}
+                  variant="outlined"
+                  onChange={this.handleInputChanged}
+                  fullWidth
+                  multiline
+                  rows={10}                
+                />
+
+                <Toolbar disableGutters>
+                  <div className={this.props.classes.grow} />
+                  <IconedButton
+                    icon={<Icon>save</Icon>}
+                    type="submit">
+                    Save
+                  </IconedButton>
+                </Toolbar>
+              </form>
+            </Grid>
           </Grid>
-        </Grid>
+        </Main>
       </Fragment>
     );
   }
 };
 
-export default PageView;
+const styles = theme => ({
+  grow: {
+    flexGrow: 1
+  }
+});
+
+export default withStyles(styles)(PageView);
