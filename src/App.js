@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { Route, Switch } from "react-router-dom";
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import AuthenticatedLayoutView from './modules/authenticated';
 import LoginView from './modules/login';
 import BookView from './modules/book';
 import BooksView from './modules/books';
@@ -28,21 +29,24 @@ const theme = createMuiTheme({
   }  
 });
 
+
+
 class App extends Component {
   render() {
     return (
-      <Router>
-        <MuiThemeProvider theme={theme}>
+      <MuiThemeProvider theme={theme}>
+        <AuthenticatedLayoutView>
           <Switch>
-            <SecureRoute exact path="/" component={BooksView} />
+            <SecureRoute exact path="/books" component={BooksView} />
             <SecureRoute exact path="/books/:bookId/pages" component={BookView} />
             <SecureRoute exact path="/pages/:pageId/choices" component={ChoicesView} />
             <SecureRoute exact path="/pages/:pageId" component={PageView} />
-            <Route path="/login" component={LoginView} />
-            <Route component={NoMatch} />
+            <SecureRoute component={NoMatch} />
           </Switch>
-        </MuiThemeProvider>
-      </Router>
+        </AuthenticatedLayoutView>
+
+        <Route path="/login" component={LoginView} />
+      </MuiThemeProvider>
     );
   }
 }

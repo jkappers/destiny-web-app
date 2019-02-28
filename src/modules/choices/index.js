@@ -11,7 +11,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Fab from '@material-ui/core/Fab';
 import Icon from '@material-ui/core/Icon';
+import DialogContext from '../../components/DialogContext';
 import { addConnection, getConnectionsFromPageId } from '../../services/data';
+import AddChoiceDialog from './components/AddChoiceDialog';
 
 class ChoicesView extends Component {
   state = {
@@ -34,35 +36,44 @@ class ChoicesView extends Component {
       this.setState({ destinations: this.state.destinations.concat(destination) }))
   }
 
-  render = () => (
-    <Fragment>
-      <AppBar color="default" position="sticky">
-        <Toolbar>
-          <IconButton color="primary" component={Link} to={`/pages/${this.props.match.params.pageId}`}>
-            <Icon>insert_drive_file</Icon>
-          </IconButton>
-        </Toolbar>          
-      </AppBar>    
-      <List>
-        <ListSubheader>Choices</ListSubheader>
-        {this.state.destinations.map(destination => (
-          <ListItem key={destination.id} button divider>
-            <ListItemText primary={destination.description} />
-            <ListItemIcon>
-              <Icon>open_in_new</Icon>
-            </ListItemIcon>
-          </ListItem>
-        ))}
-      </List>
-      <Fab
-        color="primary"
-        aria-label="Add"
-        onClick={this.onAddClicked}
-        className={this.props.classes.fab}>
-        <Icon>add_icon</Icon>
-      </Fab>
-    </Fragment>
-  );
+  render = () => {
+    return (
+      <Fragment>
+        <AppBar color="default" position="sticky">
+          <Toolbar>
+            <IconButton color="primary" component={Link} to={`/pages/${this.props.match.params.pageId}`}>
+              <Icon>insert_drive_file</Icon>
+            </IconButton>
+          </Toolbar>          
+        </AppBar>
+        <List>
+          <ListSubheader>Choices</ListSubheader>
+          {this.state.destinations.map(destination => (
+            <ListItem key={destination.id} button divider>
+              <ListItemText primary={destination.description} />
+              <ListItemIcon>
+                <Icon>open_in_new</Icon>
+              </ListItemIcon>
+            </ListItem>
+          ))}
+        </List>
+        <DialogContext>
+          {(isOpen, handleOpen, handleClose) => (
+            <Fragment>
+              <Fab
+                color="primary"
+                aria-label="Add"
+                onClick={handleOpen}
+                className={this.props.classes.fab}>
+                <Icon>add_icon</Icon>
+              </Fab>
+              <AddChoiceDialog open={isOpen} onClose={handleClose} />
+            </Fragment>
+          )}
+        </DialogContext>
+      </Fragment>
+    )
+  };
 }
 
 const styles = theme => ({

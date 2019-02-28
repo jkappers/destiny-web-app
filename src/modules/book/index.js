@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Fab from '@material-ui/core/Fab';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Icon from '@material-ui/core/Icon';
-import { getBook, getPageByBookId, addPage } from '../../services/data';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
 import PageList from './components/PageList';
+import SearchTextField from '../../components/SearchTextField';
+import { getBook, getPageByBookId, addPage } from '../../services/data';
 
 class BookView extends React.Component {
   state = {
@@ -39,12 +43,17 @@ class BookView extends React.Component {
     const { book } = this.state;
 
     if (!book) {
-      return "Loading book.";
+      return <CircularProgress />
     }
 
     return (
-      <div>
-        <h1>{book.title}</h1>
+      <Fragment>
+        <AppBar color="default" position="static">
+          <Toolbar variant="dense">
+            <SearchTextField />
+          </Toolbar>
+        </AppBar>
+      
         <PageList
           pages={this.state.pages}
         />
@@ -55,7 +64,7 @@ class BookView extends React.Component {
           className={this.props.classes.fab}>
           <Icon>add_icon</Icon>
         </Fab>          
-      </div>
+      </Fragment>
     )
   }
 }

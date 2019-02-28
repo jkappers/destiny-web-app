@@ -1,7 +1,9 @@
+import { createBrowserHistory } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux'
-import store from './services/store';
+import { ConnectedRouter } from 'connected-react-router'
+import storeFactory from './services/store';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -15,11 +17,16 @@ firebase.auth().onAuthStateChanged(user => {
   }
 });
 
+const history = createBrowserHistory();
+const store = storeFactory(history);
+
 // FIXME: This timeout isn't ideal at all :(
 setTimeout(() => {
   ReactDOM.render(
     <Provider store={store}>
-      <App />
+      <ConnectedRouter history={history}>
+        <App />
+      </ConnectedRouter>
     </Provider>,
     document.getElementById('root')
   );

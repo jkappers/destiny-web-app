@@ -22,7 +22,7 @@ const SecureRoute = ({ isAuthenticated, component: Component, ...rest }) => (
 
 const mapStateToProps = state => {
   return {
-    isAuthenticated: state.email
+    isAuthenticated: state.auth.email
   }
 }
 

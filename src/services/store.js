@@ -1,14 +1,15 @@
-import { createStore } from 'redux';
+import { applyMiddleware, compose, createStore } from 'redux'
+import { routerMiddleware } from 'connected-react-router'
 
-function reducer(state = {}, action) {
-  switch (action.type) {
-    case 'SIGN_IN':
-      return { email: action.payload.email }
-    case 'SIGN_OUT':
-      return {}
-    default:
-      return state
-  }
-}
+import reducerFactory from '../reducers/factory';
 
-export default createStore(reducer);
+export default (history, initialState = {}) => 
+  createStore(
+    reducerFactory(history),
+    initialState,
+    compose(
+      applyMiddleware(
+        routerMiddleware(history)
+      )
+    )
+  );

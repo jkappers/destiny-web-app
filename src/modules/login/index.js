@@ -25,8 +25,10 @@ class LoginView extends React.Component {
   }
 
   render() {
-    const { from } = this.props.location.state || { from: { pathname: '/' } };
+    const { from } = this.props.location.state || { from: { pathname: '/books' } };
     const { isAuthenticated } = this.props;
+
+    console.log('isAuthenaticated', isAuthenticated, this.props);
 
     if (isAuthenticated) {
       return <Redirect to={from} />;
@@ -75,7 +77,7 @@ class LoginView extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  isAuthenticated: state.email
+  isAuthenticated: state.auth.email
 });
 
 export default connect(

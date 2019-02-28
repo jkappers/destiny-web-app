@@ -1,5 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom'
+import { withStyles } from '@material-ui/core/styles'
+import Grid from '@material-ui/core/Grid';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
+import Main from '../../components/Main';
 import { getBooks } from '../../services/data';
 
 class BooksView extends React.Component {
@@ -12,12 +18,32 @@ class BooksView extends React.Component {
   }
 
   render() {
-    return this.state.books.map(x => (
-      <div key={x.id}>
-        <Link to={`/books/${x.id}/pages`}>{x.title}</Link>
-      </div>
-    ));
+    return (
+      <Main>
+        <Grid container justify="center">
+          <Grid item xs={11}>
+            <GridList cols={2}>
+              {this.state.books.map(x => (          
+                <GridListTile
+                  key={x.cover_url}
+                  component={Link}
+                  to={`/books/${x.id}/pages`}
+                  classes={{ root: this.props.classes.gridTileRoot }}>
+                  <GridListTileBar title={x.title} />
+                </GridListTile>
+              ))};
+            </GridList>
+          </Grid>
+        </Grid>
+      </Main>
+    );
   }
 }
 
-export default BooksView;
+const styles = theme => ({
+  gridTileRoot: {
+    backgroundColor: '#eee'
+  }
+});
+
+export default withStyles(styles)(BooksView);
