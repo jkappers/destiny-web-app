@@ -25,7 +25,7 @@ class BooksView extends React.Component {
             <GridList cols={2}>
               {this.state.books.map(x => (          
                 <GridListTile
-                  key={x.cover_url}
+                  key={x.id}
                   component={Link}
                   to={`/books/${x.id}/pages`}
                   classes={{ root: this.props.classes.gridTileRoot }}>

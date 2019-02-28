@@ -39,11 +39,17 @@ const getPage = pageId =>
   db.collection('pages').doc(pageId).get()
     .then(doc => adapter(doc));
 
-const getPageByBookId = bookId =>
-  db.collection('pages')
-    .where('bookId', '==', bookId)
-    .get()
-    .then(query => query.docs.map(adapter));
+const getPages = (bookId, query = null) => {
+  let result = db
+    .collection('pages')
+    .where('bookId', '==', bookId);
+  
+  if (query) {
+    result = result.where()
+  }
+
+  return result.get().then(query => query.docs.map(adapter));
+}
 
 const savePage = (pageId, data) =>
   db.collection('pages').doc(pageId).update(data);
@@ -56,6 +62,6 @@ export {
   getConnectionsFromPageId,
   addPage,
   getPage,
-  getPageByBookId,
+  getPages,
   savePage
 }

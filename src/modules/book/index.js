@@ -3,11 +3,8 @@ import { withStyles } from '@material-ui/core/styles';
 import Fab from '@material-ui/core/Fab';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Icon from '@material-ui/core/Icon';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import PageList from './components/PageList';
-import SearchTextField from '../../components/SearchTextField';
-import { getBook, getPageByBookId, addPage } from '../../services/data';
+import { getBook, getPages, addPage } from '../../services/data';
 
 class BookView extends React.Component {
   state = {
@@ -19,7 +16,7 @@ class BookView extends React.Component {
 
     Promise.all([
       getBook(bookId),
-      getPageByBookId(bookId)
+      getPages(bookId)
     ])
     .then(([book, pages]) => this.setState({ book, pages }));
   }
@@ -48,11 +45,11 @@ class BookView extends React.Component {
 
     return (
       <Fragment>
-        <AppBar color="default" position="static">
+        {/* <AppBar color="default" position="static">
           <Toolbar variant="dense">
             <SearchTextField />
           </Toolbar>
-        </AppBar>
+        </AppBar> */}
       
         <PageList
           pages={this.state.pages}
