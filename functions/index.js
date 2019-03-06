@@ -1,55 +1,67 @@
-var AWS = require('aws-sdk');
-const admin = require('firebase-admin');
+const AWS = require('aws-sdk');
 const functions = require('firebase-functions');
-const serviceAccount = require('./serviceAccountKey.json');
+const getSecrets = require('./config/getSecrets');
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
-
-const getSecrets = async () =>
-  new Promise((resolve, reject) => {
-    admin
-      .storage()
-      .bucket('destiny-app-cadf9.appspot.com')
-      .file('secrets.json')
-      .download((error, data) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(JSON.parse(data.toString()))
-        }
-      });
-  });
-
-exports.indexPage = functions.https.onRequest(async (req, res) => {
+async function getDomain() {
   const { awsCloudSearchCredentials } = await getSecrets();
   AWS.config.credentials = new AWS.Credentials(awsCloudSearchCredentials);
   AWS.config.update({ region: 'us-east-1' });
-
-  const csd = new AWS.CloudSearchDomain({
+  
+  return new AWS.CloudSearchDomain({
     endpoint: 'doc-destiny-search-0-5ufnvswgmkkkab6mjvv2dbfan4.us-east-1.cloudsearch.amazonaws.com'
-  });
+  }); 
+}
 
-  const params = {
-    contentType: 'application/json',
-    documents: JSON.stringify([
-      {
-        "type": "add",
-        "id":   "tt0484562",
-        "fields": {
-          "book_id": "123",
-          "page_id": "123",
-          "content": "an pineapple is in a tree with me and a monkey"
-        }
-      }
-    ])
-  }
+const onDocumentUploaded = (err, data) => {
+  err ? console.error(err, err.stack) : console.log(data);
+}
 
-  csd.uploadDocuments(params, function(err, data) {
-    if (err) console.log(err, err.stack); // an error occurred
-    else     console.log(data);           // successful response
-  });
-
-  res.send("xh");
+const payload = (id, fields) => ({
+  contentType: 'application/json',
+  documents: JSON.stringify([{
+    id, type: 'add', fields
+  }])
 });
+
+const handlePageCreated = async (snap, context) => {
+  const domain = await getDomain();
+  const { bookId, content } = snap.data();
+  domain.uploadDocuments(
+    payload(context.params.id, {
+      book_id: bookId,
+      content
+    }), onDocumentUploaded);  
+}
+
+const handlePageUpdated = async (change, context) => {
+  const domain = await getDomain();
+  const { bookId, content } = change.after.data();
+  domain.uploadDocuments(
+    payload(context.params.id, {
+      book_id: bookId,
+      content
+    }), onDocumentUploaded);
+};
+
+const handlePageDeleted = async (data, context) => {
+  const domain = await getDomain();
+  domain.uploadDocuments({
+    contentType: 'application/json',
+    documents: JSON.stringify([{
+      "type": "delete",
+      "id": context.params.id,
+    }])
+  }, onDocumentUploaded);  
+}
+
+exports.onPageCreated = functions.firestore
+  .document('pages/{id}')
+  .onCreate(handlePageCreated);
+
+exports.onPageUpdated = functions.firestore
+  .document('pages/{id}')
+  .onUpdate(handlePageUpdated);
+
+exports.onPageDeleted = functions.firestore
+  .document('pages/{id}')
+  .onDelete(handlePageDeleted)
