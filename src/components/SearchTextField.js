@@ -4,18 +4,20 @@ import { withStyles } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 
-const SearchTextField = ({ classes, placeholder = 'Search...' }) => (
+const SearchTextField = ({ classes, placeholder, type = 'search', ...rest }) => (
   <div className={classes.search}>
     <div className={classes.searchIcon}>
       <SearchIcon />
     </div>
     <InputBase
       fullWidth
+      type={type}
       placeholder={placeholder}
       classes={{
         root: classes.inputRoot,
         input: classes.inputInput,
       }}
+      {...rest}
     />
   </div>
 )

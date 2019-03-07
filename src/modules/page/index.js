@@ -6,9 +6,18 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Icon from '@material-ui/core/Icon';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import IconButton from '@material-ui/core/IconButton';
 import IconedButton from '../../components/IconedButton';
 import Main from '../../components/Main';
+import MenuContext from '../../components/MenuContext';
+import DialogContext from '../../components/DialogContext';
 import { getPage, savePage } from '../../services/data';
+import DeletePageDialog from './components/DeletePageDialog';
+
 
 class PageView extends React.Component {
   state = {
@@ -78,6 +87,23 @@ class PageView extends React.Component {
                 />
 
                 <Toolbar disableGutters>
+                  <DialogContext>
+                    {(isOpen, onOpen, onClose) => (
+                      <Fragment>
+                        <IconedButton
+                          color="primary"
+                          icon={<Icon>delete</Icon>}
+                          onClick={onOpen}>
+                          Delete
+                        </IconedButton>
+                        <DeletePageDialog
+                          page={page}
+                          onClose={onClose}
+                          open={isOpen}
+                        />
+                      </Fragment>
+                    )}
+                  </DialogContext>
                   <div className={this.props.classes.grow} />
                   <IconedButton
                     icon={<Icon>save</Icon>}

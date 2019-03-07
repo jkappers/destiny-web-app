@@ -35,25 +35,35 @@ const addPage = data =>
   db.collection('pages').add(data)
     .then(doc => ({ id: doc.id, ...data }));
 
+const deletePage = pageId =>
+  db.collection('pages').doc(pageId).delete();
+
 const getPage = pageId =>
   db.collection('pages').doc(pageId).get()
     .then(doc => adapter(doc));
 
-const getPages = (bookId, query = null) => {
-  let result = db
-    .collection('pages')
-    .where('bookId', '==', bookId);
-  
-  if (query) {
-    result = result.where()
+const getPages = (bookId, query = '') => {
+  if (query.length) {
+    return searchPages(bookId, query.split(' '));
   }
 
-  return result.get().then(query => query.docs.map(adapter));
+  return db
+    .collection('pages')
+    .where('bookId', '==', bookId)
+    .get()
+    .then(query => query.docs.map(adapter));
 }
 
 const savePage = (pageId, data) =>
   db.collection('pages').doc(pageId).update(data);
-     
+
+const searchPages = (bookId, terms) =>
+  fetch(`https://gajjyu9l8c.execute-api.us-east-1.amazonaws.com/production/pages?size=10&q=${terms.join(' ')}&fq=book_id:'${bookId}'`, {
+    mode: 'cors'
+  })
+    .then(async response => await response.json())
+    .then(data => data.documents)
+
 export {
   getBook,
   getBooks,
@@ -61,6 +71,7 @@ export {
   getConnectionsToPageId,
   getConnectionsFromPageId,
   addPage,
+  deletePage,
   getPage,
   getPages,
   savePage
