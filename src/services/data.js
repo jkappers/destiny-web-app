@@ -1,3 +1,12 @@
+import algoliasearch from 'algoliasearch/lite';
+
+const searchIndex = () => {
+  const appId = 'KEUYD7UDHK';
+  const apiKey = 'f39e90b216c5e896349b1cc4d30699d9';
+  const client = algoliasearch(appId, apiKey);
+  return client.initIndex('pages');
+};
+
 // eslint-disable-next-line
 const db = firebase.firestore();
 const adapter = record => ({ ...record.data(), id: record.id });
@@ -58,11 +67,17 @@ const savePage = (pageId, data) =>
   db.collection('pages').doc(pageId).update(data);
 
 const searchPages = (bookId, terms) =>
-  fetch(`https://gajjyu9l8c.execute-api.us-east-1.amazonaws.com/production/pages?size=10&q=${terms.join(' ')}&fq=book_id:'${bookId}'`, {
-    mode: 'cors'
+  searchIndex().search({
+    query: terms,
+    filters: `bookId:${bookId}`
   })
-    .then(async response => await response.json())
-    .then(data => data.documents)
+  .then(response =>
+    response.hits.map(document => {
+      const { objectID, ...page } = document;
+      page.id = objectID;
+      return page;
+    })
+  );
 
 export {
   getBook,
