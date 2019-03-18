@@ -1,57 +1,50 @@
-const AWS = require('aws-sdk');
+const algoliasearch = require('algoliasearch');
 const functions = require('firebase-functions');
 const getSecrets = require('./config/getSecrets');
 
-async function getDomain() {
-  const { awsCloudSearchCredentials } = await getSecrets();
-  AWS.config.credentials = new AWS.Credentials(awsCloudSearchCredentials);
-  AWS.config.update({ region: 'us-east-1' });
+async function getAlgoliaIndex() {
+  const { algolia } = await getSecrets();
   
-  return new AWS.CloudSearchDomain({
-    endpoint: 'doc-destiny-search-0-5ufnvswgmkkkab6mjvv2dbfan4.us-east-1.cloudsearch.amazonaws.com'
-  }); 
+  return algoliasearch(
+    algolia.appId,
+    algolia.apiKey
+  ).initIndex(algolia.indexName);
 }
 
-const onDocumentUploaded = (err, data) => {
-  err ? console.error(err, err.stack) : console.log(data);
-}
-
-const payload = (id, fields) => ({
-  contentType: 'application/json',
-  documents: JSON.stringify([{
-    id, type: 'add', fields
-  }])
-});
+const saveOrUpdateObject = object =>
+  getAlgoliaIndex()
+    .then(index => index.saveObject(object))
+    .catch(error => {
+      console.error(`Error saving document on Algolia ${object.objectId}`, error);
+      process.exit(1);
+    });
 
 const handlePageCreated = async (snap, context) => {
-  const domain = await getDomain();
-  const { bookId, content } = snap.data();
-  domain.uploadDocuments(
-    payload(context.params.id, {
-      book_id: bookId,
-      content
-    }), onDocumentUploaded);  
+  const { bookId, content } = snap.data();  
+  saveOrUpdateObject({
+    objectID: context.params.id,
+    bookId,
+    content
+  })
 }
 
 const handlePageUpdated = async (change, context) => {
-  const domain = await getDomain();
   const { bookId, content } = change.after.data();
-  domain.uploadDocuments(
-    payload(context.params.id, {
-      book_id: bookId,
-      content
-    }), onDocumentUploaded);
+  saveOrUpdateObject({
+    objectID: context.params.id,
+    bookId,
+    content
+  })
 };
 
-const handlePageDeleted = async (data, context) => {
-  const domain = await getDomain();
-  domain.uploadDocuments({
-    contentType: 'application/json',
-    documents: JSON.stringify([{
-      "type": "delete",
-      "id": context.params.id,
-    }])
-  }, onDocumentUploaded);  
+const handlePageDeleted = async (_data, context) => {
+  const index = await getAlgoliaIndex();
+  index
+    .deleteObject(context.params.id)
+    .catch(error => {
+      console.error('Error when updating document on Algolia', error);
+      process.exit(1);
+    });
 }
 
 exports.onPageCreated = functions.firestore
